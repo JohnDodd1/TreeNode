@@ -1,13 +1,9 @@
 package tomsksoft.jd.managertree.tree
 
-interface Component {
-    val name: String
-
-    fun log() = name.log()
-}
-
 data class ManagerComposite(override val name: String,
-                            private val components: ArrayList<Component> = ArrayList<Component>()) : Component, Iterable<Component> {
+                            private val components: ArrayList<Component> = ArrayList<Component>()
+                            ) : Component {
+
     override fun iterator() = CompositeIterator(components.iterator())
 
     fun add(component: Component): ManagerComposite {
@@ -21,7 +17,8 @@ data class ManagerComposite(override val name: String,
     }
 }
 
-data class ManagerLeaf(override val name: String) : Component, Iterable<Component> {
+data class ManagerLeaf(override val name: String) : Component {
+
     override fun iterator() = object : Iterator<Component> {
         override fun next() = throw UnsupportedOperationException("Leafs have no derivatives")
         override fun hasNext() = false
@@ -29,3 +26,9 @@ data class ManagerLeaf(override val name: String) : Component, Iterable<Componen
 }
 
 data class Company(val headComponent: ManagerComposite = ManagerComposite("Главный менеджер"))
+
+interface Component : Iterable<Component>{
+    val name: String
+
+    fun log() = name.log()
+}
