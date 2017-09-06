@@ -1,9 +1,9 @@
 package tomsksoft.jd.managertree.tree
 
+import com.github.vivchar.rendererrecyclerviewadapter.ItemModel
 import tomsksoft.jd.managertree.app.DataProvider
 import tomsksoft.jd.managertree.delegated_adapter.AdapterConstants.LEAF
 import tomsksoft.jd.managertree.delegated_adapter.AdapterConstants.NODE
-import tomsksoft.jd.managertree.delegated_adapter.ViewType
 import java.util.*
 
 data class Node(override val name: String,
@@ -52,15 +52,25 @@ data class NodeModel(val name: String,
                      val id: Int,
                      val hasChildren: Boolean = false,
                      val imageResId: Int,
-                     val isExpanded: Boolean) : ViewType {
-    override fun getViewType() = NODE
+                     val isExpanded: Boolean) : ItemModel {
+    override fun getType() = NODE
+
+    companion object {
+        val TYPE = NODE
+    }
 }
 
 data class LeafModel(val name: String,
                      val nodeLevel: Int = 0,
                      val id: Int,
-                     val imageResId: Int) : ViewType {
-    override fun getViewType() = LEAF
+                     val imageResId: Int) : ItemModel {
+    override fun getType() = LEAF
+
+    companion object {
+        val TYPE = LEAF
+    }
+
+
 }
 
 interface Component : Iterable<Component> {

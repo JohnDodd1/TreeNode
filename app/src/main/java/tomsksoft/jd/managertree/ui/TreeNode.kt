@@ -1,7 +1,6 @@
 package tomsksoft.jd.managertree.ui
 
 import android.view.View
-import android.widget.TextView
 import tellh.com.recyclertreeview_lib.LayoutItemType
 import tellh.com.recyclertreeview_lib.TreeNode
 import tellh.com.recyclertreeview_lib.TreeViewBinder
@@ -11,11 +10,11 @@ class Dir(val name: String) : LayoutItemType {
     override fun getLayoutId() = R.layout.tree_node
 }
 
-class NodeBinder : TreeViewBinder<TreeHolder>() {
+class NodeBinder : TreeViewBinder<NodeHolder>() {
 
-    override fun provideViewHolder(itemView: View) = TreeHolder(itemView)
+    override fun provideViewHolder(itemView: View) = NodeHolder(itemView)
 
-    override fun bindView(holder: TreeHolder, position: Int, node: TreeNode<*>) {
+    override fun bindView(holder: NodeHolder, position: Int, node: TreeNode<*>) {
         holder.name.text = (node.content as Dir).name
     }
 
@@ -23,7 +22,7 @@ class NodeBinder : TreeViewBinder<TreeHolder>() {
 }
 
 /*
-class TreeHolder : TreeViewBinder.ViewHolder {
+class NodeHolder : TreeViewBinder.ViewHolder {
     val name: TextView
 
     constructor(root: View) : super(root) {

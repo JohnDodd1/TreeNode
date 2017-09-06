@@ -35,3 +35,4 @@ fun <T> RecyclerView.Adapter<*>.autoNotify(old: List<T>, new: List<T>, compare: 
         }
     }).apply { dispatchUpdatesTo(this@autoNotify) }
 }
+
