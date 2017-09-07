@@ -31,8 +31,6 @@ dependencies {
 
     compile 'com.github.vivchar:RendererRecyclerViewAdapter:1.2.0'
     compile 'com.android.support:cardview-v7:26.0.2'
-
-    testImplementation 'junit:junit:4.12'
 }
 
 configurations.all {

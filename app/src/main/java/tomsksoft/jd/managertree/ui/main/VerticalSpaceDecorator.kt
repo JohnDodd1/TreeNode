@@ -9,5 +9,7 @@ class VerticalSpaceDecorator : RecyclerView.ItemDecoration() {
         super.getItemOffsets(outRect, view, parent, state)
         if (parent.getChildAdapterPosition(view) != 0)
             outRect.set(0, 16, 0, 0)
+        if (parent.getChildAdapterPosition(view) == parent.adapter.itemCount - 1)
+            outRect.set(0, 16, 0, 32)
     }
 }
