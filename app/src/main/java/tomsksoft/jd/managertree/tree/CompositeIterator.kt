@@ -1,9 +1,9 @@
 package tomsksoft.jd.managertree.tree
 
-import tomsksoft.jd.managertree.app.log
 import java.util.*
 
 class CompositeIterator(iterator: Iterator<Component>) : Iterator<Component> {
+
     private val stack = Stack<Iterator<Component>>()
 
     init {
@@ -24,12 +24,11 @@ class CompositeIterator(iterator: Iterator<Component>) : Iterator<Component> {
         return if (stack.isEmpty()) false else {
             if (!stack.peek().hasNext()) {
                 stack.pop()
-                return hasNext()
-            } else return true
+                hasNext()
+            } else true
         }
     }
 
     fun getLevel() = stack.size
-
 
 }

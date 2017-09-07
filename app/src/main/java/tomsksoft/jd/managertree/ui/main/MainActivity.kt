@@ -1,4 +1,4 @@
-package tomsksoft.jd.managertree.ui
+package tomsksoft.jd.managertree.ui.main
 
 import android.graphics.Rect
 import android.os.Bundle
@@ -11,13 +11,27 @@ import com.github.vivchar.rendererrecyclerviewadapter.ItemModel
 import com.github.vivchar.rendererrecyclerviewadapter.RendererRecyclerViewAdapter
 import kotlinx.android.synthetic.main.activity_main.*
 import tomsksoft.jd.managertree.R
+import tomsksoft.jd.managertree.delegated_adapter.LeafRenderer
+import tomsksoft.jd.managertree.delegated_adapter.NodeRenderer
 import tomsksoft.jd.managertree.tree.BaseModel
 import tomsksoft.jd.managertree.tree.LeafModel
 import tomsksoft.jd.managertree.tree.NodeModel
 
 class MainActivity : AppCompatActivity(), IView {
-    private val callback = createCallback { old, new -> old?.baseId == new?.baseId }
+    private val callback by lazy { createCallback { old, new -> old?.baseId == new?.baseId } }
     private val presenter = Presenter(this)
+    private val recyclerView by lazy {
+        recycler.apply {
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            addItemDecoration(Decorator())
+            itemAnimator = DefaultItemAnimator().apply {
+                addDuration = 200
+                removeDuration = 200
+                changeDuration = 200
+                moveDuration = 200
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,34 +43,24 @@ class MainActivity : AppCompatActivity(), IView {
                 presenter.onNodeClicked(model)
             }
         }))
-
         renderer.registerRenderer(LeafRenderer(LeafModel.TYPE, this, object : LeafRenderer.Listener {
             override fun onItemClicked(model: LeafModel) {
                 presenter.onLeafClicked(model)
             }
         }))
-        recycler.adapter = renderer
-        val layoutManager = LinearLayoutManager(this)
-        recycler.layoutManager = layoutManager
-        recycler.addItemDecoration(Decorator())
-        recycler.itemAnimator = DefaultItemAnimator().apply {
-            addDuration = 200
-            removeDuration = 200
-            changeDuration = 200
-            moveDuration = 200
-        }
+        recyclerView.adapter = renderer
         presenter.onCreate()
-    }
-
-    override fun onStop() {
-        presenter.onStop()
-        super.onStop()
     }
 
     override fun updateAdapter(models: List<ItemModel>) {
         (recycler.adapter as RendererRecyclerViewAdapter).apply {
             setItems(models, callback)
         }
+    }
+
+    override fun onStop() {
+        presenter.onStop()
+        super.onStop()
     }
 }
 

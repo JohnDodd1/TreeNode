@@ -15,7 +15,7 @@ class DataProvider private constructor() {
         val atomic by lazy { AtomicInteger() }
 
         init {
-            company
+            company.next()
             timer(period = 1000, daemon = true) {
                 if (random.nextBoolean())
                     addRandomComponent()

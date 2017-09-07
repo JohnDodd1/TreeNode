@@ -9,21 +9,16 @@ import java.util.*
 data class NodeComponent(override val name: String,
                          override val id: Int = DataProvider.atomic.incrementAndGet(),
                          private val components: ArrayList<Component> = ArrayList()) : Component {
+
     override fun getChildren() = components
 
     override fun iterator() = CompositeIterator(components.iterator())
 
-    fun add(component: Component): NodeComponent {
-        components.add(component)
-        return this
-    }
+    fun add(component: Component) = components.add(component)
 
     fun remove(component: Component) = components.remove(component)
 
-    fun addAll(components: List<Component>): NodeComponent {
-        this.components.addAll(components)
-        return this
-    }
+    fun addAll(list: List<Component>) = components.addAll(list)
 
     override fun hasChildren() = !components.isEmpty()
 }
@@ -46,7 +41,8 @@ data class LeafComponent(override val name: String, override val id: Int = DataP
 }
 
 
-class Company(val headComponent: NodeComponent = NodeComponent("Главный менеджер", DataProvider.atomic.incrementAndGet())) {
+class Company(val headComponent: NodeComponent = NodeComponent("General director", DataProvider.atomic.incrementAndGet())) {
+
     private var callback: (() -> Unit)? = null
 
     fun subscribe(callback: () -> Unit) {
@@ -68,6 +64,7 @@ data class NodeModel(val name: String,
                      val id: Int,
                      val hasChildren: Boolean = false,
                      val isExpanded: Boolean) : BaseModel(id) {
+
     override fun getType() = NODE
 
     companion object {
