@@ -7,90 +7,70 @@ import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.RotateAnimation
 import android.widget.ImageView
+import android.widget.RelativeLayout
 import android.widget.TextView
 import com.github.vivchar.rendererrecyclerviewadapter.ViewRenderer
 import tomsksoft.jd.managertree.R
-import tomsksoft.jd.managertree.app.autoNotify
 import tomsksoft.jd.managertree.app.inflate
-import tomsksoft.jd.managertree.app.update
+import tomsksoft.jd.managertree.tree.LeafModel
 import tomsksoft.jd.managertree.tree.NodeModel
 
-class Adapter(private val listener: Listener) : RecyclerView.Adapter<NodeHolder>() {
-    private val models: MutableList<NodeModel> = arrayListOf()
-
-    override fun onBindViewHolder(holder: NodeHolder, position: Int, payloads: MutableList<Any>) {
-        if (payloads.isEmpty()) {
-            super.onBindViewHolder(holder, position, payloads)
-        } else {
-            if (payloads.firstOrNull() as Boolean) {
-                val expanded = models[position].isExpanded
-                holder.image.apply {
-                    rotation = 0f
-                    startAnimation(if (expanded) createAnimator(0f, 90f) else createAnimator(90f, 0f))
-                }
-            }
-        }
-    }
-
-    override fun onBindViewHolder(holder: NodeHolder, position: Int) {
-        holder.apply {
-            val model = models[position]
-            offset.text = "      ".repeat(model.nodeLevel)
-            name.text = model.name
-            with(image) {
-                setImageResource(model.imageResId)
-                rotation = if (model.isExpanded) 90f else 0f
-            }
-            itemView.setOnClickListener { listener.onItemClicked(model) }
-        }
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(parent.inflate(R.layout.tree_node))
-
-    override fun getItemCount() = models.size
-
-    fun updateItems(models: MutableList<NodeModel>) {
-        val old = this.models.toList()
-        this.models.update(models)
-        autoNotify(old, this.models) { o, n -> o.id == n.id }
-    }
-}
-
-class NodeRenderer(viewType: Int, context: Context, private val listener: Listener) : ViewRenderer<NodeModel, NodeHolder>(viewType, context) {
-    override fun createViewHolder(parent: ViewGroup?) = NodeHolder(parent!!.inflate(R.layout.tree_node))
+class NodeRenderer(viewType: Int, context: Context, private val listener: Listener) : ViewRenderer<NodeModel, NodeRenderer.NodeHolder>(viewType, context) {
+    override fun createViewHolder(parent: ViewGroup?) = NodeHolder(parent!!.inflate(R.layout.line_node))
 
     override fun bindView(item: NodeModel, holder: NodeHolder, payloads: MutableList<Any?>) {
         if (payloads.isEmpty()) {
             super.bindView(item, holder, payloads)
         } else {
-            if (payloads.firstOrNull() as Boolean) {
-                holder.image.apply {
-                    rotation = 0f
-                    startAnimation(if (item.isExpanded) createAnimator(0f, 90f) else createAnimator(90f, 0f))
-                }
+            holder.image.apply {
+                rotation = 0f
+                startAnimation(if (item.isExpanded) createAnimator(0f, 90f) else createAnimator(90f, 0f))
+                visibility = if (item.hasChildren) View.VISIBLE else View.INVISIBLE
             }
         }
     }
 
     override fun bindView(model: NodeModel, holder: NodeHolder) {
         holder.apply {
-            offset.text = "      ".repeat(model.nodeLevel)
+            itemView.layoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                    .apply { setMargins(64 * model.level, 0, 0, 0) }
             name.text = model.name
-            with(image) {
-                setImageResource(model.imageResId)
-                rotation = if (model.isExpanded) 90f else 0f
-            }
+            image.rotation = if (model.isExpanded) 90f else 0f
+            image.visibility = if (model.hasChildren) View.VISIBLE else View.INVISIBLE
             itemView.setOnClickListener { listener.onItemClicked(model) }
         }
+    }
 
+    class NodeHolder(root: View) : RecyclerView.ViewHolder(root) {
+        val name: TextView = root.findViewById(R.id.leaf_text_view)
+        val image: ImageView = root.findViewById(R.id.leaf_image_view)
+    }
+
+    interface Listener {
+        fun onItemClicked(model: NodeModel)
     }
 
 }
 
-class NodeHolder(root: View) : RecyclerView.ViewHolder(root) {
-    val name: TextView = root.findViewById(R.id.node_text_view)
-    val offset: TextView = root.findViewById(R.id.node_offset)
-    val image: ImageView = root.findViewById(R.id.node_image_view)
+class LeafRenderer(viewType: Int, context: Context, private val listener: Listener) : ViewRenderer<LeafModel, LeafRenderer.LeafHolder>(viewType, context) {
+    override fun createViewHolder(parent: ViewGroup?) = LeafHolder(parent!!.inflate(R.layout.line_leaf))
+
+    override fun bindView(model: LeafModel, holder: LeafHolder) {
+        holder.apply {
+            itemView.layoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                    .apply { setMargins(96 * model.level, 0, 0, 0) }
+            name.text = model.name
+            itemView.setOnClickListener { listener.onItemClicked(model) }
+        }
+    }
+
+    class LeafHolder(root: View) : RecyclerView.ViewHolder(root) {
+        val name: TextView = root.findViewById(R.id.leaf_text_view)
+    }
+
+    interface Listener {
+        fun onItemClicked(model: LeafModel)
+    }
 }
 
 fun createAnimator(from: Float, to: Float)
@@ -99,8 +79,4 @@ fun createAnimator(from: Float, to: Float)
     fillAfter = true
     duration = 400
 
-}
-
-interface Listener {
-    fun onItemClicked(model: NodeModel)
 }

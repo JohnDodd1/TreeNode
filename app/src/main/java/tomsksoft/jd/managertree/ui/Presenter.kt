@@ -1,9 +1,14 @@
 package tomsksoft.jd.managertree.ui
 
 import android.util.SparseBooleanArray
-import tomsksoft.jd.managertree.R
+import com.github.vivchar.rendererrecyclerviewadapter.ItemModel
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
 import tomsksoft.jd.managertree.app.DataProvider
+import tomsksoft.jd.managertree.app.log
 import tomsksoft.jd.managertree.tree.Component
+import tomsksoft.jd.managertree.tree.LeafModel
+import tomsksoft.jd.managertree.tree.NodeComponent
 import tomsksoft.jd.managertree.tree.NodeModel
 
 class Presenter(private val view: IView) {
@@ -11,16 +16,24 @@ class Presenter(private val view: IView) {
     private val head = DataProvider.company.headComponent
 
     fun onCreate() {
-        updateModels()
+        "onCreate".log()
+        DataProvider.company.subscribe { updateModels() }
     }
 
     private fun updateModels() {
-        val models = mutableListOf<NodeModel>()
-        getLevel(head) { component, level ->
-            models.add(createModel(component, level))
-            return@getLevel expanded[component.id]
+        doAsync {
+            val models = mutableListOf<ItemModel>()
+            getLevel(head) { component, level ->
+                if (component is NodeComponent)
+                    models.add(createNodeModel(component, level))
+                else
+                    models.add(createLeafModel(component, level))
+                return@getLevel expanded[component.id]
+            }
+
+            uiThread { view.updateAdapter(models) }
         }
-        view.updateAdapter(models)
+
     }
 
     private fun getLevel(component: Component, level: Int = 0, callback: (Component, Int) -> Boolean) {
@@ -31,18 +44,30 @@ class Presenter(private val view: IView) {
         }
     }
 
-    fun onItemClicked(model: NodeModel) {
+    private fun createLeafModel(component: Component, level: Int) = LeafModel(component.name, level, component.id)
+
+    private fun createNodeModel(component: Component, level: Int)
+            = NodeModel(component.name, level, component.id, component.hasChildren(),
+            if (component.hasChildren()) expanded[component.id] else false)
+
+
+    fun onNodeClicked(model: NodeModel) {
         expanded.put(model.id, !expanded[model.id])
         updateModels()
     }
 
-    private fun createModel(component: Component, level: Int): NodeModel {
-        val res = if (!component.hasChildren())
-            R.drawable.ic_person_black_24dp
-        else R.drawable.ic_chevron_right_black_24dp
+    fun onLeafClicked(model: LeafModel) {
 
-        return NodeModel(component.name, level, component.id, component.hasChildren(), res,
-                if (component.hasChildren()) expanded[component.id] else false)
     }
 
+    fun onStop() {
+        DataProvider.company.dispose()
+        val cursor = Cursor()
+
+    }
+
+
+    class Cursor{
+        private val q = 2
+    }
 }

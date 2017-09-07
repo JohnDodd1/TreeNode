@@ -6,19 +6,21 @@ import tomsksoft.jd.managertree.delegated_adapter.AdapterConstants.LEAF
 import tomsksoft.jd.managertree.delegated_adapter.AdapterConstants.NODE
 import java.util.*
 
-data class Node(override val name: String,
-                override val id: Int = DataProvider.atomic.incrementAndGet(),
-                private val components: ArrayList<Component> = ArrayList()) : Component {
+data class NodeComponent(override val name: String,
+                         override val id: Int = DataProvider.atomic.incrementAndGet(),
+                         private val components: ArrayList<Component> = ArrayList()) : Component {
     override fun getChildren() = components
 
     override fun iterator() = CompositeIterator(components.iterator())
 
-    fun add(component: Component): Node {
+    fun add(component: Component): NodeComponent {
         components.add(component)
         return this
     }
 
-    fun addAll(components: List<Component>): Node {
+    fun remove(component: Component) = components.remove(component)
+
+    fun addAll(components: List<Component>): NodeComponent {
         this.components.addAll(components)
         return this
     }
@@ -27,7 +29,7 @@ data class Node(override val name: String,
 }
 
 
-data class Leaf(override val name: String, override val id: Int = DataProvider.atomic.incrementAndGet()) : Component {
+data class LeafComponent(override val name: String, override val id: Int = DataProvider.atomic.incrementAndGet()) : Component {
 
     override fun getChildren() = throw UnsupportedOperationException("Leafs have no derivatives")
 
@@ -44,15 +46,28 @@ data class Leaf(override val name: String, override val id: Int = DataProvider.a
 }
 
 
-class Company(val headComponent: Node = Node("Главный менеджер", DataProvider.atomic.incrementAndGet()))
+class Company(val headComponent: NodeComponent = NodeComponent("Главный менеджер", DataProvider.atomic.incrementAndGet())) {
+    private var callback: (() -> Unit)? = null
+
+    fun subscribe(callback: () -> Unit) {
+        this.callback = callback
+    }
+
+    fun dispose() {
+        callback = null
+    }
+
+    fun next() {
+        callback?.invoke()
+    }
+}
 
 
 data class NodeModel(val name: String,
-                     val nodeLevel: Int = 0,
+                     val level: Int = 0,
                      val id: Int,
                      val hasChildren: Boolean = false,
-                     val imageResId: Int,
-                     val isExpanded: Boolean) : ItemModel {
+                     val isExpanded: Boolean) : BaseModel(id) {
     override fun getType() = NODE
 
     companion object {
@@ -61,17 +76,16 @@ data class NodeModel(val name: String,
 }
 
 data class LeafModel(val name: String,
-                     val nodeLevel: Int = 0,
-                     val id: Int,
-                     val imageResId: Int) : ItemModel {
+                     val level: Int = 0, val id: Int) : BaseModel(id) {
     override fun getType() = LEAF
 
     companion object {
         val TYPE = LEAF
     }
 
-
 }
+
+abstract class BaseModel(val baseId: Int) : ItemModel
 
 interface Component : Iterable<Component> {
     val name: String

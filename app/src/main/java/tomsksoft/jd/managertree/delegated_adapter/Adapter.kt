@@ -9,7 +9,7 @@ import tomsksoft.jd.managertree.app.inflate
 class Adapter : ViewTypeDelegateAdapter {
     private val models = arrayListOf<ViewType>()
 
-    override fun onCreateViewHolder(parent: ViewGroup) = Holder(parent.inflate(R.layout.tree_node))
+    override fun onCreateViewHolder(parent: ViewGroup) = Holder(parent.inflate(R.layout.line_node))
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, item: ViewType) {
 
