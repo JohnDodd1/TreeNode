@@ -9,7 +9,6 @@ import java.util.*
 data class NodeComponent(override val name: String,
                          override val id: Int = DataProvider.atomic.incrementAndGet(),
                          private val components: ArrayList<Component> = ArrayList()) : Component {
-
     override fun getChildren() = components
 
     override fun iterator() = CompositeIterator(components.iterator())
