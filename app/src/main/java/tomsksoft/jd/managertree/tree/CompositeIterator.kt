@@ -1,5 +1,6 @@
 package tomsksoft.jd.managertree.tree
 
+import tomsksoft.jd.managertree.tree.components.Component
 import java.util.*
 
 class CompositeIterator(iterator: Iterator<Component>) : Iterator<Component> {
