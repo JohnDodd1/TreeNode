@@ -24,7 +24,7 @@ class NodeRenderer(viewType: Int, context: Context, private val listener: Listen
         } else {
             holder.image.apply {
                 rotation = 0f
-                //startAnimation(if (item.isExpanded) createAnimator(0f, 90f) else createAnimator(90f, 0f))
+                startAnimation(if (item.isExpanded) createAnimator(0f, 90f) else createAnimator(90f, 0f))
                 visibility = if (item.hasChildren) View.VISIBLE else View.INVISIBLE
             }
         }
